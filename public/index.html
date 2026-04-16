@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marisa OJ Tracker — Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <span class="logo">M</span>
+        <div>
+          <h1>Marisa OJ Tracker</h1>
+          <p class="subtitle">Theo dõi tiến độ luyện code C++ mỗi ngày</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <a href="create-user.html" class="btn btn-primary">+ Thêm người học</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="overview">
+      <div class="stat-card">
+        <span class="stat-label">Tổng số người học</span>
+        <span class="stat-value" id="stat-students">—</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Bài làm hôm nay</span>
+        <span class="stat-value" id="stat-today">—</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Tổng bài đã làm</span>
+        <span class="stat-value" id="stat-total">—</span>
+      </div>
+      <div class="stat-card stat-card-alert">
+        <span class="stat-label">Chưa đủ 5 bài hôm nay</span>
+        <span class="stat-value" id="stat-alert">—</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Danh sách người học</h2>
+        <span class="muted" id="today-label"></span>
+      </div>
+      <div class="student-grid" id="student-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer container">
+    <span>Cron cập nhật tự động mỗi 00:00 hằng ngày · Nguồn: marisaoj.com</span>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>renderDashboard();</script>
+</body>
+</html>

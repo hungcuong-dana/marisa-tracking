@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chi tiết học viên — Marisa OJ Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <a href="index.html" class="back-link">← Về Dashboard</a>
+      </div>
+      <div class="topbar-actions">
+        <a href="create-user.html" class="btn btn-ghost">+ Thêm người học</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="profile">
+      <div class="profile-avatar" id="profile-avatar">?</div>
+      <div class="profile-info">
+        <h1 id="profile-name">—</h1>
+        <p class="muted" id="profile-username">—</p>
+        <div class="profile-badges" id="profile-badges"></div>
+      </div>
+      <div class="profile-today" id="profile-today"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Lộ trình học</h2>
+        <span class="muted">Chọn một dạng để mở danh sách bài và tick minh chứng AC</span>
+      </div>
+      <div class="curriculum" id="curriculum"></div>
+    </section>
+
+    <section class="section calendar-section">
+      <div class="section-head">
+        <h2>Lịch làm bài</h2>
+        <div class="calendar-nav">
+          <button class="btn btn-ghost" id="prev-month">‹</button>
+          <span id="calendar-month-label"></span>
+          <button class="btn btn-ghost" id="next-month">›</button>
+        </div>
+      </div>
+      <div class="calendar-legend">
+        <span><i class="dot dot-ok"></i> Đủ bài (≥5)</span>
+        <span><i class="dot dot-warn"></i> Chưa đủ</span>
+        <span><i class="dot dot-none"></i> Không làm</span>
+        <span><i class="dot dot-today"></i> Hôm nay</span>
+      </div>
+      <div class="calendar" id="calendar"></div>
+    </section>
+
+    <section class="section" id="day-detail-section" hidden>
+      <div class="section-head">
+        <h2 id="day-title">Chi tiết ngày</h2>
+        <button class="btn btn-ghost" id="close-day">Đóng</button>
+      </div>
+      <div id="day-detail"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>renderStudentPage();</script>
+</body>
+</html>

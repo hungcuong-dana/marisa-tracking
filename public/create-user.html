@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thêm người học — Marisa OJ Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <a href="index.html" class="back-link">← Về Dashboard</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container narrow">
+    <section class="card">
+      <h1>Thêm người học mới</h1>
+      <p class="muted">Nhập thông tin tối thiểu để bắt đầu theo dõi trên marisaoj.com</p>
+
+      <form id="create-form" class="form">
+        <label class="form-row">
+          <span>Họ và tên <em>*</em></span>
+          <input type="text" name="name" required placeholder="Ví dụ: Nguyễn Văn A" />
+        </label>
+
+        <label class="form-row">
+          <span>Phụ huynh</span>
+          <input type="text" name="parent" placeholder="Tên phụ huynh / số điện thoại" />
+        </label>
+
+        <label class="form-row">
+          <span>Tài khoản marisaoj <em>*</em></span>
+          <input type="text" name="username" required placeholder="vd: vana2015" autocomplete="off" />
+        </label>
+
+        <label class="form-row">
+          <span>Mật khẩu marisaoj <em>*</em></span>
+          <input type="password" name="password" required placeholder="••••••••" autocomplete="new-password" />
+        </label>
+
+        <div class="form-actions">
+          <a href="index.html" class="btn btn-ghost">Huỷ</a>
+          <button type="submit" class="btn btn-primary">Lưu học viên</button>
+        </div>
+      </form>
+
+      <div class="note" id="form-note" hidden></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>wireCreateForm();</script>
+</body>
+</html>

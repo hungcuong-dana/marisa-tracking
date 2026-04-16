@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Danh sách bài — Marisa OJ Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <a href="index.html" class="back-link">← Dashboard</a>
+      </div>
+      <div class="topbar-actions">
+        <a href="#" class="btn btn-ghost" id="back-student">Về trang học viên</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="breadcrumb" id="breadcrumb"></nav>
+
+    <section class="problems-hero" id="problems-hero"></section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Danh sách bài tập</h2>
+        <span class="muted">Tick AC, đính kèm ảnh và dán code C++ để phụ huynh kiểm tra</span>
+      </div>
+
+      <div class="problems-table" id="problems-table"></div>
+    </section>
+  </main>
+
+  <!-- Modal code editor / viewer -->
+  <div class="modal" id="code-modal" hidden>
+    <div class="modal-backdrop" data-close-code="1"></div>
+    <div class="modal-body modal-body-wide">
+      <div class="modal-head">
+        <h3 id="code-modal-title">Mã nguồn</h3>
+        <div class="modal-head-actions">
+          <button class="btn btn-ghost btn-xs" id="code-edit-btn" hidden>Sửa</button>
+          <button class="btn btn-ghost btn-xs" id="code-delete-btn" hidden>Xoá code</button>
+          <button class="modal-close" data-close-code="1">✕</button>
+        </div>
+      </div>
+
+      <div class="code-editor" id="code-editor">
+        <textarea id="code-textarea" spellcheck="false"
+          placeholder="// Dán code C++ AC vào đây...&#10;#include <bits/stdc++.h>&#10;using namespace std;&#10;int main() { ... }"></textarea>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="code-cancel-btn">Huỷ</button>
+          <button class="btn btn-primary" id="code-save-btn">Lưu code</button>
+        </div>
+      </div>
+
+      <div class="code-preview" id="code-preview" hidden>
+        <pre><code class="language-cpp" id="code-preview-content"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+  <script>renderProblemsPage();</script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Level {
+  id      Int     @id @default(autoincrement())
+  key     String  @unique
+  name    String
+  tagline String
+  bg      String
+  fg      String
+  order   Int
+  groups  Group[]
+}
+
+model Group {
+  id         Int        @id @default(autoincrement())
+  levelId    Int
+  name       String
+  order      Int
+  level      Level      @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  categories Category[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  groupId  Int
+  key      String
+  name     String
+  freq     String?
+  order    Int
+  group    Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  problems Problem[]
+
+  @@unique([groupId, key])
+}
+
+model Problem {
+  id         Int        @id @default(autoincrement())
+  categoryId Int
+  key        String     @unique
+  name       String
+  stars      Int
+  url        String?
+  order      Int
+  category   Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  progress   Progress[]
+}
+
+model Student {
+  id        String     @id @default(cuid())
+  name      String
+  parent    String?
+  username  String     @unique
+  password  String
+  goal      Int        @default(5)
+  createdAt DateTime   @default(now())
+  progress  Progress[]
+}
+
+model Progress {
+  id        Int      @id @default(autoincrement())
+  studentId String
+  problemId Int
+  done      Boolean  @default(false)
+  date      String?
+  code      String?
+  updatedAt DateTime @updatedAt
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  problem   Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, problemId])
+}
