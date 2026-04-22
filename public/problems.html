@@ -34,6 +34,16 @@
     </section>
   </main>
 
+  <!-- Modal preview ảnh -->
+  <div class="modal" id="preview-modal" hidden>
+    <div class="modal-backdrop" data-close-preview="1"></div>
+    <div class="modal-body">
+      <button class="modal-close" data-close-preview="1">✕</button>
+      <img id="preview-img" alt="Ảnh nháp" />
+      <div class="modal-caption" id="preview-caption"></div>
+    </div>
+  </div>
+
   <!-- Modal code editor / viewer -->
   <div class="modal" id="code-modal" hidden>
     <div class="modal-backdrop" data-close-code="1"></div>

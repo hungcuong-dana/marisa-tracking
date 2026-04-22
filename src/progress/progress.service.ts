@@ -53,6 +53,38 @@ export class ProgressService {
     });
     return { ok: true };
   }
+
+  async addScreenshot(studentId: string, problemKey: string, data: string) {
+    const progress = await this.ensureProgress(studentId, problemKey);
+    const shot = await this.prisma.screenshot.create({
+      data: { progressId: progress.id, data },
+    });
+    return { id: shot.id, data: shot.data, createdAt: shot.createdAt };
+  }
+
+  async removeScreenshot(studentId: string, screenshotId: number) {
+    const shot = await this.prisma.screenshot.findUnique({
+      where: { id: screenshotId },
+      include: { progress: true },
+    });
+    if (!shot || shot.progress.studentId !== studentId) {
+      throw new NotFoundException('Screenshot not found');
+    }
+    await this.prisma.screenshot.delete({ where: { id: screenshotId } });
+    return { ok: true };
+  }
+
+  private async ensureProgress(studentId: string, problemKey: string) {
+    const student = await this.prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) throw new NotFoundException('Student not found');
+    const problem = await this.prisma.problem.findUnique({ where: { key: problemKey } });
+    if (!problem) throw new NotFoundException('Problem not found');
+    return this.prisma.progress.upsert({
+      where: { studentId_problemId: { studentId, problemId: problem.id } },
+      create: { studentId, problemId: problem.id, done: false },
+      update: {},
+    });
+  }
 }
 
 function todayLocal(): string {

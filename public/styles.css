@@ -616,11 +616,11 @@ main { padding: 28px 0 60px; }
 }
 .pr-row {
   display: grid;
-  grid-template-columns: 44px 44px 1fr 96px 140px 180px;
+  grid-template-columns: 40px 40px 1fr 80px 110px 140px 180px;
   align-items: center;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border);
-  gap: 12px;
+  gap: 10px;
   font-size: 14px;
 }
 .pr-row:last-child { border-bottom: none; }
@@ -652,6 +652,149 @@ main { padding: 28px 0 60px; }
   cursor: pointer;
 }
 .btn-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Ảnh nháp column */
+.pr-shots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.pr-shots .btn-thumb {
+  width: 34px;
+  height: 34px;
+}
+.shot-more {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 6px;
+  cursor: pointer;
+  background: var(--surface-2);
+  border-radius: 4px;
+}
+.shot-more:hover { background: var(--border); }
+
+/* Day detail mở rộng */
+.day-summary { margin-bottom: 14px; }
+.day-summary h3 { margin: 0; font-size: 18px; }
+.day-detail-empty {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.day-detail-empty h3 { margin: 0 0 6px; }
+
+.day-groups { display: flex; flex-direction: column; gap: 14px; }
+.day-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.day-group-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.day-group-title { font-weight: 600; font-size: 14px; }
+.day-group-count { color: var(--primary); font-weight: 600; font-size: 13px; }
+.day-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.day-problem {
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+.day-problem-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.day-problem-name { font-weight: 600; font-size: 14px; }
+.day-problem-meta { display: flex; gap: 6px; }
+.chip {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.chip-code { color: #0ea5e9; }
+.chip-img { color: #f59e0b; }
+.day-problem-empty {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.day-code {
+  margin: 6px 0;
+  padding: 12px 14px;
+  background: #0d1117;
+  border-radius: 6px;
+  max-height: 260px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.day-code code { font-family: "SFMono-Regular", Consolas, Menlo, monospace; tab-size: 4; }
+
+.day-thumbs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.day-thumb {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: #fff;
+  transition: transform 0.1s;
+}
+.day-thumb:hover { transform: scale(1.04); border-color: var(--primary); }
+
+/* Preview modal gallery */
+.modal-caption .preview-title { font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.preview-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.nav-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+.nav-btn:hover { background: var(--surface-2); }
 
 /* Code column */
 .pr-code { display: flex; align-items: center; }
@@ -853,13 +996,13 @@ main { padding: 28px 0 60px; }
     row-gap: 4px;
   }
   .pr-head { display: none; }
-  .pr-idx, .pr-stars, .pr-date, .pr-code {
+  .pr-idx, .pr-stars, .pr-date, .pr-code, .pr-shots {
     grid-column: 2;
     font-size: 12px;
     color: var(--muted);
   }
   .pr-name { grid-column: 2; }
-  .pr-check { grid-row: 1 / span 5; }
+  .pr-check { grid-row: 1 / span 6; }
   .day-problem-list { columns: 1; }
 }
 

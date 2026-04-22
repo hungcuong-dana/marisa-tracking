@@ -46,7 +46,10 @@ export class StudentsService {
       where: { id },
       include: {
         progress: {
-          include: { problem: { select: { key: true, categoryId: true, stars: true, name: true } } },
+          include: {
+            problem: { select: { key: true, categoryId: true, stars: true, name: true } },
+            screenshots: { orderBy: { createdAt: 'asc' }, select: { id: true, data: true, createdAt: true } },
+          },
         },
       },
     });
@@ -62,6 +65,7 @@ export class StudentsService {
         done: p.done,
         date: p.date,
         code: p.code,
+        screenshots: p.screenshots,
         updatedAt: p.updatedAt,
       })),
     };

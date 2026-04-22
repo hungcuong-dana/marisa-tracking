@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "Screenshot" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "progressId" INTEGER NOT NULL,
+    "data" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Screenshot_progressId_fkey" FOREIGN KEY ("progressId") REFERENCES "Progress" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Chi tiết học viên — Marisa OJ Tracker</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
 </head>
 <body>
   <header class="topbar">
@@ -64,7 +65,19 @@
     </section>
   </main>
 
+  <!-- Modal preview ảnh -->
+  <div class="modal" id="preview-modal" hidden>
+    <div class="modal-backdrop" data-close-preview="1"></div>
+    <div class="modal-body">
+      <button class="modal-close" data-close-preview="1">✕</button>
+      <img id="preview-img" alt="Ảnh nháp" />
+      <div class="modal-caption" id="preview-caption"></div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
   <script>renderStudentPage();</script>
 </body>
 </html>

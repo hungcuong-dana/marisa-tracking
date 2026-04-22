@@ -55,7 +55,41 @@ const api = {
     apiFetch(`/students/${id}/progress/${encodeURIComponent(key)}`, {
       method: "PUT", body: JSON.stringify(body),
     }),
+  addScreenshot: (id, key, data) =>
+    apiFetch(`/students/${id}/progress/${encodeURIComponent(key)}/screenshots`, {
+      method: "POST", body: JSON.stringify({ data }),
+    }),
+  removeScreenshot: (id, key, shotId) =>
+    apiFetch(`/students/${id}/progress/${encodeURIComponent(key)}/screenshots/${shotId}`, {
+      method: "DELETE",
+    }),
 };
+
+// Đọc file ảnh → data URL (client-side resize để tiết kiệm dung lượng)
+function readImageAsDataUrl(file, maxDim = 1600) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Không đọc được file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.onerror = () => reject(new Error("Ảnh không hợp lệ"));
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 /* ============================================================
  * Curriculum helpers
@@ -227,6 +261,7 @@ async function renderStudentPage() {
       _studentCtx.selectedDate = null;
       renderCalendar();
     };
+    wirePreviewModal();
     renderCalendar();
   } catch (e) {
     showError(e);
@@ -355,52 +390,98 @@ function selectDay(isoStr) {
   _studentCtx.selectedDate = isoStr;
   renderCalendar();
   const rec = _studentCtx._history[isoStr];
-  const { student, curriculum } = _studentCtx;
+  const { student, curriculum, progressMap } = _studentCtx;
   const section = document.getElementById("day-detail-section");
   const detail = document.getElementById("day-detail");
   document.getElementById("day-title").textContent = `Chi tiết ngày ${formatDateVN(isoStr)}`;
 
   if (!rec) {
     detail.innerHTML = `
-      <div class="day-detail-grid">
-        <div class="day-detail-info">
-          <h3>Chưa có bài làm</h3>
-          <p class="muted">Học viên không tick bài nào trong ngày này.</p>
-        </div>
+      <div class="day-detail-empty">
+        <h3>Chưa có bài làm</h3>
+        <p class="muted">Học viên không tick bài nào trong ngày này.</p>
       </div>
     `;
-  } else {
-    const byCat = {};
-    rec.problemKeys.forEach(pk => {
-      const info = findProblemInfo(curriculum, pk);
-      if (!info) return;
-      const key = `${info.level.name} · ${info.category.name}`;
-      (byCat[key] = byCat[key] || []).push(info.problem);
-    });
-    const rows = Object.entries(byCat).map(([k, list]) =>
-      `<div class="day-level-row"><span class="lvl-name">${k}</span><span class="lvl-count">+${list.length} bài</span></div>`
-    ).join("");
-    const problemList = rec.problemKeys.map(pk => {
-      const info = findProblemInfo(curriculum, pk);
-      return `<li>${info ? info.problem.name : pk}</li>`;
-    }).join("");
-
-    const alert = rec.total < student.goal;
-    detail.innerHTML = `
-      <div class="day-detail-grid">
-        <div class="day-detail-info">
-          <h3>${rec.total} bài hoàn thành
-            ${alert ? `<span class="badge badge-warn" style="margin-left:8px">Chưa đủ ${student.goal}</span>`
-                    : `<span class="badge badge-ok" style="margin-left:8px">Đủ bài</span>`}
-          </h3>
-          <div class="day-levels">${rows}</div>
-          <ul class="day-problem-list">${problemList}</ul>
-        </div>
-      </div>
-    `;
+    section.hidden = false;
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
   }
+
+  // Gom theo Mức · Dạng, giữ thứ tự xuất hiện trong curriculum
+  const groups = new Map(); // "Mức · Dạng" → { levelName, catName, problems: [{problem, progress}] }
+  rec.problemKeys.forEach(pk => {
+    const info = findProblemInfo(curriculum, pk);
+    if (!info) return;
+    const key = `${info.level.name} · ${info.category.name}`;
+    if (!groups.has(key)) {
+      groups.set(key, { levelName: info.level.name, catName: info.category.name, items: [] });
+    }
+    groups.get(key).items.push({ problem: info.problem, rec: progressMap.get(pk) });
+  });
+
+  const alert = rec.total < student.goal;
+  const summary = `
+    <div class="day-summary">
+      <h3>${rec.total} bài hoàn thành
+        ${alert ? `<span class="badge badge-warn" style="margin-left:8px">Chưa đủ ${student.goal}</span>`
+                : `<span class="badge badge-ok" style="margin-left:8px">Đủ bài</span>`}
+      </h3>
+    </div>
+  `;
+
+  const groupsHtml = [...groups.values()].map(g => `
+    <div class="day-group">
+      <div class="day-group-head">
+        <span class="day-group-title">${g.levelName} · ${g.catName}</span>
+        <span class="day-group-count">+${g.items.length} bài</span>
+      </div>
+      <div class="day-group-body">
+        ${g.items.map(({ problem, rec }) => renderDayProblem(problem, rec)).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  detail.innerHTML = summary + `<div class="day-groups">${groupsHtml}</div>`;
+  // Highlight tất cả code blocks
+  if (window.hljs) detail.querySelectorAll("pre code.language-cpp").forEach(el => window.hljs.highlightElement(el));
+
   section.hidden = false;
   section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderDayProblem(problem, rec) {
+  const hasCode = !!rec?.code;
+  const shots = rec?.screenshots || [];
+  const thumbs = shots.length
+    ? `<div class="day-thumbs">
+         ${shots.map(s => `<img class="day-thumb" src="${s.data}" alt="" onclick="openPreview('${problem.key}', ${s.id})">`).join("")}
+       </div>`
+    : "";
+  const codeHtml = hasCode
+    ? `<pre class="day-code"><code class="language-cpp">${escapeHtml(rec.code)}</code></pre>`
+    : "";
+  const emptyNote = !hasCode && !shots.length
+    ? `<div class="day-problem-empty">Chưa có code hoặc ảnh nháp</div>`
+    : "";
+  return `
+    <div class="day-problem">
+      <div class="day-problem-head">
+        <span class="day-problem-name">${problem.name}</span>
+        <span class="day-problem-meta">
+          ${hasCode ? `<span class="chip chip-code">&lt;/&gt; code</span>` : ""}
+          ${shots.length ? `<span class="chip chip-img">🖼 ${shots.length}</span>` : ""}
+        </span>
+      </div>
+      ${codeHtml}
+      ${thumbs}
+      ${emptyNote}
+    </div>
+  `;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 /* ============================================================
@@ -438,6 +519,7 @@ async function renderProblemsPage() {
     renderProblemsHero();
     renderProblemsTable();
     wireCodeModal();
+    wirePreviewModal();
   } catch (e) {
     showError(e);
   }
@@ -477,6 +559,7 @@ function renderProblemsTable() {
       <div class="pr-stars">Điểm</div>
       <div class="pr-date">Ngày AC</div>
       <div class="pr-code">Code C++</div>
+      <div class="pr-shots">Ảnh nháp</div>
     </div>
   `;
 
@@ -484,6 +567,16 @@ function renderProblemsTable() {
     const rec = progressMap.get(p.key);
     const done = !!rec?.done;
     const hasCode = !!rec?.code;
+    const shots = rec?.screenshots || [];
+
+    const shotsHtml = shots.length
+      ? shots.slice(0, 3).map(s =>
+          `<button class="btn-thumb" title="Xem" onclick="openPreview('${p.key}', ${s.id})">
+             <img src="${s.data}" alt="">
+           </button>`
+        ).join("")
+        + (shots.length > 3 ? `<span class="shot-more" onclick="openPreview('${p.key}')">+${shots.length - 3}</span>` : "")
+      : "";
 
     return `
       <div class="pr-row ${done ? "pr-done" : ""}" data-pkey="${p.key}">
@@ -502,6 +595,13 @@ function renderProblemsTable() {
             ? `<button class="btn btn-code" onclick="openCodeModal('${p.key}')"><span class="code-icon">&lt;/&gt;</span> Xem code</button>`
             : `<button class="btn btn-ghost btn-xs" onclick="openCodeModal('${p.key}')">+ Dán code</button>`}
         </div>
+        <div class="pr-shots">
+          ${shotsHtml}
+          <label class="btn btn-ghost btn-xs upload-btn" title="Thêm ảnh nháp">
+            + Ảnh
+            <input type="file" accept="image/*" multiple hidden onchange="uploadShots('${p.key}', this.files); this.value=''">
+          </label>
+        </div>
       </div>
     `;
   }).join("");
@@ -511,15 +611,108 @@ function renderProblemsTable() {
 
 async function onToggle(problemKey, checked) {
   try {
-    const { student } = _probCtx;
+    const { student, progressMap } = _probCtx;
+    const current = progressMap.get(problemKey) || {};
     const rec = await api.upsertProgress(student.id, problemKey, { done: checked });
-    _probCtx.progressMap.set(problemKey, rec);
+    progressMap.set(problemKey, { ...rec, screenshots: current.screenshots || [] });
     renderProblemsHero();
     renderProblemsTable();
   } catch (e) {
     alert(`Lỗi lưu: ${e.message}`);
     renderProblemsTable();
   }
+}
+
+async function uploadShots(problemKey, files) {
+  if (!files?.length) return;
+  const { student, progressMap } = _probCtx;
+  const rec = progressMap.get(problemKey) || { screenshots: [] };
+  try {
+    for (const f of files) {
+      const data = await readImageAsDataUrl(f);
+      const shot = await api.addScreenshot(student.id, problemKey, data);
+      rec.screenshots = [...(rec.screenshots || []), shot];
+    }
+    progressMap.set(problemKey, rec);
+    renderProblemsTable();
+  } catch (e) {
+    alert(`Lỗi upload ảnh: ${e.message}`);
+  }
+}
+
+async function deleteShot(problemKey, shotId) {
+  if (!confirm("Xoá ảnh này?")) return;
+  const { student, progressMap } = _probCtx;
+  try {
+    await api.removeScreenshot(student.id, problemKey, shotId);
+    const rec = progressMap.get(problemKey);
+    if (rec) rec.screenshots = rec.screenshots.filter(s => s.id !== shotId);
+    renderProblemsTable();
+    renderPreviewGallery(problemKey);
+  } catch (e) {
+    alert(`Lỗi: ${e.message}`);
+  }
+}
+
+/* ============================================================
+ * Preview modal (ảnh nháp)
+ * ============================================================ */
+let _preview = { problemKey: null, index: 0 };
+
+function openPreview(problemKey, shotId) {
+  const ctx = _probCtx || _studentCtx;
+  if (!ctx) return;
+  const progressMap = ctx.progressMap;
+  const rec = progressMap.get(problemKey);
+  if (!rec?.screenshots?.length) return;
+  _preview.problemKey = problemKey;
+  _preview.index = shotId ? Math.max(0, rec.screenshots.findIndex(s => s.id === shotId)) : 0;
+  document.getElementById("preview-modal").hidden = false;
+  renderPreviewGallery(problemKey);
+}
+
+function renderPreviewGallery(problemKey) {
+  const ctx = _probCtx || _studentCtx;
+  const rec = ctx.progressMap.get(problemKey);
+  const modal = document.getElementById("preview-modal");
+  if (!rec?.screenshots?.length) { modal.hidden = true; return; }
+
+  const idx = Math.min(_preview.index, rec.screenshots.length - 1);
+  _preview.index = idx;
+  const shot = rec.screenshots[idx];
+  const problem = findProblemInfo(ctx.curriculum, problemKey)?.problem;
+  document.getElementById("preview-img").src = shot.data;
+
+  const total = rec.screenshots.length;
+  const nav = total > 1
+    ? `<button class="nav-btn" onclick="previewStep(-1)">‹</button>
+       <span>${idx + 1} / ${total}</span>
+       <button class="nav-btn" onclick="previewStep(1)">›</button>`
+    : "";
+  const canDelete = !!_probCtx; // chỉ cho xoá ở trang problems
+  document.getElementById("preview-caption").innerHTML = `
+    <div class="preview-title">${problem?.name || problemKey}</div>
+    <div class="preview-nav">
+      ${nav}
+      ${canDelete ? `<button class="btn btn-ghost btn-xs" onclick="deleteShot('${problemKey}', ${shot.id})">Xoá ảnh</button>` : ""}
+    </div>
+  `;
+}
+
+function previewStep(delta) {
+  const ctx = _probCtx || _studentCtx;
+  const rec = ctx.progressMap.get(_preview.problemKey);
+  if (!rec) return;
+  _preview.index = (_preview.index + delta + rec.screenshots.length) % rec.screenshots.length;
+  renderPreviewGallery(_preview.problemKey);
+}
+
+function wirePreviewModal() {
+  const modal = document.getElementById("preview-modal");
+  if (!modal) return;
+  modal.addEventListener("click", (e) => {
+    if (e.target.dataset.closePreview) modal.hidden = true;
+  });
 }
 
 /* ============================================================
