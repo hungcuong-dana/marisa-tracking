@@ -829,13 +829,13 @@ main { padding: 28px 0 60px; }
 
 .day-code {
   margin: 6px 0;
-  padding: 12px 14px;
+  padding: 14px 16px;
   background: #0d1117;
   border-radius: 6px;
-  max-height: 260px;
+  max-height: 640px;
   overflow: auto;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.55;
 }
 .day-code code { font-family: "SFMono-Regular", Consolas, Menlo, monospace; tab-size: 4; }
 
