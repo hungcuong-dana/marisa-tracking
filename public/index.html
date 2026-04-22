@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Marisa OJ Tracker — Dashboard</title>
+  <title>Marisa OJ Tracker</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -16,46 +16,69 @@
           <p class="subtitle">Theo dõi tiến độ luyện code C++ mỗi ngày</p>
         </div>
       </div>
-      <div class="topbar-actions">
-        <a href="create-user.html" class="btn btn-primary">+ Thêm người học</a>
+      <div class="topbar-actions" id="topbar-role-badge" hidden>
+        <span class="role-pill" id="role-pill"></span>
+        <button class="btn btn-ghost btn-xs" onclick="resetRole()">Đổi vai trò</button>
       </div>
     </div>
   </header>
 
   <main class="container">
-    <section class="overview">
-      <div class="stat-card">
-        <span class="stat-label">Tổng số người học</span>
-        <span class="stat-value" id="stat-students">—</span>
+    <!-- Role selection -->
+    <section class="role-select" id="role-select" hidden>
+      <div class="role-hero">
+        <h1>Bạn là ai?</h1>
+        <p class="muted">Chọn vai trò để vào đúng giao diện</p>
       </div>
-      <div class="stat-card">
-        <span class="stat-label">Bài làm hôm nay</span>
-        <span class="stat-value" id="stat-today">—</span>
+      <div class="role-grid">
+        <button class="role-card role-student" onclick="chooseRole('student')">
+          <div class="role-emoji">🎓</div>
+          <div class="role-name">Học sinh</div>
+          <div class="role-desc">Tick bài, dán code C++, upload ảnh nháp</div>
+        </button>
+        <button class="role-card role-parent" onclick="chooseRole('parent')">
+          <div class="role-emoji">👨‍👩‍👧</div>
+          <div class="role-name">Phụ huynh</div>
+          <div class="role-desc">Xem tiến độ, kiểm tra code và ảnh nháp của con</div>
+        </button>
       </div>
-      <div class="stat-card">
-        <span class="stat-label">Tổng bài đã làm</span>
-        <span class="stat-value" id="stat-total">—</span>
-      </div>
-      <div class="stat-card stat-card-alert">
-        <span class="stat-label">Chưa đủ 5 bài hôm nay</span>
-        <span class="stat-value" id="stat-alert">—</span>
+      <div class="role-cta">
+        <a href="create-user.html" class="btn btn-ghost">+ Thêm người học mới</a>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <h2>Danh sách người học</h2>
-        <span class="muted" id="today-label"></span>
-      </div>
-      <div class="student-grid" id="student-grid"></div>
+    <!-- Student list (shown after role selected) -->
+    <section id="student-list-view" hidden>
+      <section class="overview">
+        <div class="stat-card">
+          <span class="stat-label">Tổng số người học</span>
+          <span class="stat-value" id="stat-students">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Bài làm hôm nay</span>
+          <span class="stat-value" id="stat-today">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Tổng bài đã làm</span>
+          <span class="stat-value" id="stat-total">—</span>
+        </div>
+        <div class="stat-card stat-card-alert">
+          <span class="stat-label">Chưa đủ 5 bài hôm nay</span>
+          <span class="stat-value" id="stat-alert">—</span>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Danh sách người học</h2>
+          <span class="muted" id="today-label"></span>
+        </div>
+        <div class="student-grid" id="student-grid"></div>
+      </section>
     </section>
   </main>
 
-  <footer class="footer container">
-    <span>Cron cập nhật tự động mỗi 00:00 hằng ngày · Nguồn: marisaoj.com</span>
-  </footer>
-
   <script src="app.js"></script>
-  <script>renderDashboard();</script>
+  <script>initDashboard();</script>
 </body>
 </html>

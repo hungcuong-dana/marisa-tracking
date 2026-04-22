@@ -7,6 +7,14 @@ const VN_MONTHS = ["Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Thán
   "Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12"];
 
 /* ============================================================
+ * Role (student | parent) — lưu localStorage
+ * ============================================================ */
+const ROLE_KEY = "marisa-role";
+function getRole() { return localStorage.getItem(ROLE_KEY) || "parent"; } // mặc định an toàn = parent (read-only)
+function roleLabel(r) { return r === "parent" ? "👨‍👩‍👧 Phụ huynh" : "🎓 Học sinh"; }
+const IS_PARENT = () => getRole() === "parent";
+
+/* ============================================================
  * Helpers
  * ============================================================ */
 function toISOLocal(d) {
@@ -129,8 +137,38 @@ function countDoneInLevel(progressMap, curriculum, levelKey) {
 }
 
 /* ============================================================
- * Dashboard
+ * Dashboard — landing + list
  * ============================================================ */
+function initDashboard() {
+  const roleSel = document.getElementById("role-select");
+  const listView = document.getElementById("student-list-view");
+  const badge = document.getElementById("topbar-role-badge");
+  const pill = document.getElementById("role-pill");
+
+  const role = localStorage.getItem(ROLE_KEY);
+  if (!role) {
+    roleSel.hidden = false;
+    listView.hidden = true;
+    badge.hidden = true;
+  } else {
+    roleSel.hidden = true;
+    listView.hidden = false;
+    badge.hidden = false;
+    pill.textContent = roleLabel(role);
+    renderDashboard();
+  }
+}
+
+function chooseRole(role) {
+  localStorage.setItem(ROLE_KEY, role);
+  initDashboard();
+}
+
+function resetRole() {
+  localStorage.removeItem(ROLE_KEY);
+  initDashboard();
+}
+
 async function renderDashboard() {
   try {
     const students = await api.listStudents();
@@ -221,6 +259,8 @@ let _studentCtx = null; // { student, progressMap, curriculum, calMonth, selecte
 async function renderStudentPage() {
   const id = getParam("id");
   if (!id) return showError(new Error("Thiếu id học viên"));
+  const pill = document.getElementById("role-pill");
+  if (pill) pill.textContent = roleLabel(getRole());
 
   try {
     const [curriculum, student] = await Promise.all([api.curriculum(), api.getStudent(id)]);
@@ -452,31 +492,41 @@ function selectDay(isoStr) {
 function renderDayProblem(problem, rec) {
   const hasCode = !!rec?.code;
   const shots = rec?.screenshots || [];
+  const hasContent = hasCode || shots.length > 0;
   const thumbs = shots.length
     ? `<div class="day-thumbs">
-         ${shots.map(s => `<img class="day-thumb" src="${s.data}" alt="" onclick="openPreview('${problem.key}', ${s.id})">`).join("")}
+         ${shots.map(s => `<img class="day-thumb" src="${s.data}" alt="" onclick="event.stopPropagation(); openPreview('${problem.key}', ${s.id})">`).join("")}
        </div>`
     : "";
   const codeHtml = hasCode
     ? `<pre class="day-code"><code class="language-cpp">${escapeHtml(rec.code)}</code></pre>`
     : "";
-  const emptyNote = !hasCode && !shots.length
+  const emptyNote = !hasContent
     ? `<div class="day-problem-empty">Chưa có code hoặc ảnh nháp</div>`
     : "";
   return `
-    <div class="day-problem">
-      <div class="day-problem-head">
+    <div class="day-problem collapsed ${hasContent ? "" : "no-content"}">
+      <div class="day-problem-head" onclick="toggleDayProblem(this)">
         <span class="day-problem-name">${problem.name}</span>
         <span class="day-problem-meta">
           ${hasCode ? `<span class="chip chip-code">&lt;/&gt; code</span>` : ""}
           ${shots.length ? `<span class="chip chip-img">🖼 ${shots.length}</span>` : ""}
+          ${hasContent ? `<span class="chevron">▸</span>` : ""}
         </span>
       </div>
-      ${codeHtml}
-      ${thumbs}
-      ${emptyNote}
+      <div class="day-problem-body">
+        ${codeHtml}
+        ${thumbs}
+        ${emptyNote}
+      </div>
     </div>
   `;
+}
+
+function toggleDayProblem(headEl) {
+  const wrap = headEl.closest(".day-problem");
+  if (wrap.classList.contains("no-content")) return;
+  wrap.classList.toggle("collapsed");
 }
 
 function escapeHtml(s) {
@@ -494,6 +544,8 @@ async function renderProblemsPage() {
   const levelKey = getParam("level");
   const catKey = getParam("cat");
   if (!studentId || !levelKey || !catKey) return showError(new Error("Thiếu tham số URL"));
+  const pill = document.getElementById("role-pill");
+  if (pill) pill.textContent = roleLabel(getRole());
 
   try {
     const [curriculum, student] = await Promise.all([api.curriculum(), api.getStudent(studentId)]);
@@ -563,6 +615,7 @@ function renderProblemsTable() {
     </div>
   `;
 
+  const readonly = IS_PARENT();
   const rows = category.problems.map((p, i) => {
     const rec = progressMap.get(p.key);
     const done = !!rec?.done;
@@ -578,11 +631,27 @@ function renderProblemsTable() {
         + (shots.length > 3 ? `<span class="shot-more" onclick="openPreview('${p.key}')">+${shots.length - 3}</span>` : "")
       : "";
 
+    const codeCell = hasCode
+      ? `<button class="btn btn-code" onclick="openCodeModal('${p.key}')"><span class="code-icon">&lt;/&gt;</span> Xem code</button>`
+      : readonly
+        ? `<span class="muted">—</span>`
+        : `<button class="btn btn-ghost btn-xs" onclick="openCodeModal('${p.key}')">+ Dán code</button>`;
+
+    const shotsCell = `
+      ${shotsHtml || (readonly ? `<span class="muted">—</span>` : "")}
+      ${readonly ? "" : `
+        <label class="btn btn-ghost btn-xs upload-btn" title="Thêm ảnh nháp">
+          + Ảnh
+          <input type="file" accept="image/*" multiple hidden onchange="uploadShots('${p.key}', this.files); this.value=''">
+        </label>
+      `}
+    `;
+
     return `
       <div class="pr-row ${done ? "pr-done" : ""}" data-pkey="${p.key}">
         <div class="pr-check">
           <label class="checkbox">
-            <input type="checkbox" ${done ? "checked" : ""} onchange="onToggle('${p.key}', this.checked)">
+            <input type="checkbox" ${done ? "checked" : ""} ${readonly ? "disabled" : `onchange="onToggle('${p.key}', this.checked)"`}>
             <span></span>
           </label>
         </div>
@@ -590,18 +659,8 @@ function renderProblemsTable() {
         <div class="pr-name"><a href="${p.url || "#"}" target="_blank" rel="noopener">${p.name}</a></div>
         <div class="pr-stars">★ ${p.stars}</div>
         <div class="pr-date">${done ? formatDateVN(rec.date) : "—"}</div>
-        <div class="pr-code">
-          ${hasCode
-            ? `<button class="btn btn-code" onclick="openCodeModal('${p.key}')"><span class="code-icon">&lt;/&gt;</span> Xem code</button>`
-            : `<button class="btn btn-ghost btn-xs" onclick="openCodeModal('${p.key}')">+ Dán code</button>`}
-        </div>
-        <div class="pr-shots">
-          ${shotsHtml}
-          <label class="btn btn-ghost btn-xs upload-btn" title="Thêm ảnh nháp">
-            + Ảnh
-            <input type="file" accept="image/*" multiple hidden onchange="uploadShots('${p.key}', this.files); this.value=''">
-          </label>
-        </div>
+        <div class="pr-code">${codeCell}</div>
+        <div class="pr-shots">${shotsCell}</div>
       </div>
     `;
   }).join("");
@@ -689,7 +748,7 @@ function renderPreviewGallery(problemKey) {
        <span>${idx + 1} / ${total}</span>
        <button class="nav-btn" onclick="previewStep(1)">›</button>`
     : "";
-  const canDelete = !!_probCtx; // chỉ cho xoá ở trang problems
+  const canDelete = !!_probCtx && !IS_PARENT();
   document.getElementById("preview-caption").innerHTML = `
     <div class="preview-title">${problem?.name || problemKey}</div>
     <div class="preview-nav">
@@ -724,6 +783,7 @@ function openCodeModal(problemKey) {
   const { category, progressMap } = _probCtx;
   const problem = category.problems.find(p => p.key === problemKey);
   const rec = progressMap.get(problemKey);
+  if (IS_PARENT() && !rec?.code) return; // parent + không có code → không làm gì
   _codeModalKey = problemKey;
 
   document.getElementById("code-modal-title").textContent = `Mã nguồn — ${problem.name}`;
@@ -735,10 +795,12 @@ function openCodeModal(problemKey) {
 function switchCodeMode(mode) {
   const rec = _probCtx.progressMap.get(_codeModalKey);
   const hasCode = !!rec?.code;
+  const readonly = IS_PARENT();
+  if (readonly) mode = "preview"; // parent luôn ở preview
   document.getElementById("code-editor").hidden = mode !== "edit";
   document.getElementById("code-preview").hidden = mode !== "preview";
-  document.getElementById("code-edit-btn").hidden = mode !== "preview";
-  document.getElementById("code-delete-btn").hidden = !hasCode;
+  document.getElementById("code-edit-btn").hidden = readonly || mode !== "preview";
+  document.getElementById("code-delete-btn").hidden = readonly || !hasCode;
 
   if (mode === "edit") {
     document.getElementById("code-textarea").focus();

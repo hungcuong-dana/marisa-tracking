@@ -491,6 +491,59 @@ main { padding: 28px 0 60px; }
   gap: 14px;
 }
 
+/* Role selection landing */
+.role-select {
+  max-width: 720px;
+  margin: 40px auto;
+  text-align: center;
+}
+.role-hero h1 { margin: 0 0 6px; font-size: 28px; }
+.role-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 28px 0 20px;
+}
+.role-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  cursor: pointer;
+  text-align: center;
+  font: inherit;
+  color: inherit;
+  transition: all 0.15s;
+  box-shadow: var(--shadow);
+}
+.role-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 20px rgba(79,70,229,0.12);
+}
+.role-student:hover { border-color: #4f46e5; }
+.role-parent:hover  { border-color: #16a34a; }
+.role-emoji { font-size: 44px; margin-bottom: 10px; line-height: 1; }
+.role-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.role-desc { font-size: 13px; color: var(--muted); }
+.role-cta { margin-top: 18px; }
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .role-grid { grid-template-columns: 1fr; }
+}
+
 /* Level hero (Mức 0/1/2) */
 .level-hero {
   border-radius: var(--radius);
@@ -718,15 +771,34 @@ main { padding: 28px 0 60px; }
   background: var(--surface-2);
   border-radius: 8px;
   border-left: 3px solid var(--primary);
+  transition: background 0.15s;
 }
+.day-problem.no-content { border-left-color: var(--border); opacity: 0.7; }
 .day-problem-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
   flex-wrap: wrap;
+  cursor: pointer;
+  user-select: none;
 }
+.day-problem.no-content .day-problem-head { cursor: default; }
+.day-problem:not(.no-content):hover { background: #e7eaf3; }
+.day-problem-body {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.day-problem.collapsed .day-problem-body { display: none; }
+.chevron {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+.day-problem:not(.collapsed) .chevron { transform: rotate(90deg); }
 .day-problem-name { font-weight: 600; font-size: 14px; }
 .day-problem-meta { display: flex; gap: 6px; }
 .chip {
