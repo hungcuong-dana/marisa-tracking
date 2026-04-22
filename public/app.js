@@ -25,6 +25,14 @@ function toISOLocal(d) {
 }
 const TODAY = toISOLocal(new Date());
 
+// Phân tier theo số bài / ngày (dùng chung cho calendar + mini-cal)
+function tierClass(count, goal = 5) {
+  if (count === 0) return "none";
+  if (count < goal) return "warn";
+  if (count < goal * 2) return "ok";
+  return "great";
+}
+
 function initials(name) {
   return name.split(" ").slice(-2).map(w => w[0]).join("").toUpperCase();
 }
@@ -230,10 +238,7 @@ function renderMiniCal(student) {
   const goal = student.goal || 5;
   const cells = student.daily.map(d => {
     const isToday = d.date === TODAY;
-    let cls = "mini-cell";
-    if (d.count === 0) cls += " mini-empty";
-    else if (d.count >= goal) cls += " mini-ok";
-    else cls += " mini-warn";
+    let cls = "mini-cell mini-" + tierClass(d.count, goal);
     if (isToday) cls += " mini-today";
     const [, m, day] = d.date.split("-");
     const tip = `${Number(day)}/${Number(m)} — ${d.count} bài${isToday ? " (hôm nay)" : ""}`;
@@ -409,12 +414,10 @@ function renderCalendar() {
     const classes = ["cal-day"];
     let info = "—";
     if (isFuture) classes.push("future");
-    else if (rec) {
-      classes.push(rec.total >= student.goal ? "ok" : "warn");
-      info = `${rec.total} bài`;
-    } else {
-      classes.push("warn");
-      info = "0 bài";
+    else {
+      const total = rec?.total || 0;
+      classes.push(tierClass(total, student.goal));
+      info = `${total} bài`;
     }
     if (isToday) classes.push("today");
     if (selectedDate === isoStr) classes.push("selected");

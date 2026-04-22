@@ -257,10 +257,11 @@ main { padding: 28px 0 60px; }
 }
 .mini-cell:hover { transform: scale(1.2); z-index: 1; }
 .mini-count { font-weight: 600; line-height: 1; }
-.mini-empty { background: #f1f3f8; }
-.mini-empty .mini-count { color: transparent; }
-.mini-warn { background: #fecaca; color: #991b1b; }
-.mini-ok   { background: #86efac; color: #14532d; }
+.mini-none  { background: #fef2f2; }
+.mini-none  .mini-count { color: transparent; }
+.mini-warn  { background: #fcd34d; color: #92400e; }
+.mini-ok    { background: #86efac; color: #14532d; }
+.mini-great { background: #16a34a; color: #fff; }
 .mini-today { outline: 2px solid var(--today); outline-offset: 1px; }
 
 .mini-levels {
@@ -337,9 +338,10 @@ main { padding: 28px 0 60px; }
   width: 10px; height: 10px;
   border-radius: 50%;
 }
-.dot-ok { background: var(--ok); }
-.dot-warn { background: var(--danger); }
-.dot-none { background: var(--border); }
+.dot-none  { background: #fecaca; }
+.dot-warn  { background: #fbbf24; }
+.dot-ok    { background: #86efac; }
+.dot-great { background: #16a34a; }
 .dot-today { background: var(--today); }
 
 .calendar {
@@ -376,10 +378,15 @@ main { padding: 28px 0 60px; }
 .cal-day.empty { visibility: hidden; }
 .cal-day .cal-num { font-weight: 600; }
 .cal-day .cal-count { font-size: 11px; color: var(--muted); }
-.cal-day.ok { background: #dcfce7; }
-.cal-day.ok .cal-count { color: #166534; }
-.cal-day.warn { background: #fee2e2; }
-.cal-day.warn .cal-count { color: #991b1b; }
+.cal-day.none  { background: #fef2f2; }
+.cal-day.none  .cal-count { color: #b91c1c; }
+.cal-day.warn  { background: #fef3c7; }
+.cal-day.warn  .cal-count { color: #92400e; }
+.cal-day.warn  .cal-num   { color: #92400e; }
+.cal-day.ok    { background: #dcfce7; }
+.cal-day.ok    .cal-count { color: #166534; }
+.cal-day.great { background: #16a34a; }
+.cal-day.great .cal-num, .cal-day.great .cal-count { color: #fff; }
 .cal-day.today { border-color: var(--today); }
 .cal-day.selected { box-shadow: 0 0 0 3px rgba(79,70,229,0.25); }
 .cal-day.future { opacity: 0.4; cursor: default; }
