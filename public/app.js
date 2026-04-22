@@ -323,10 +323,11 @@ function renderLevelBlock(lv, progressMap, curriculum, studentId) {
       `).join("");
 
   return `
-    <div class="level-block">
-      <div class="level-hero" style="background:${lv.bg};color:${lv.fg}">
+    <div class="level-block collapsed">
+      <div class="level-hero" style="background:${lv.bg};color:${lv.fg}" onclick="toggleLevelBlock(this)">
         <div class="level-hero-head">
           <div class="level-hero-name">${lv.name}</div>
+          <span class="level-chevron">▸</span>
         </div>
         <div class="level-hero-tag">${lv.tagline}</div>
         <div class="level-hero-stat">
@@ -337,6 +338,10 @@ function renderLevelBlock(lv, progressMap, curriculum, studentId) {
       <div class="level-body">${groupsHtml}</div>
     </div>
   `;
+}
+
+function toggleLevelBlock(heroEl) {
+  heroEl.closest(".level-block").classList.toggle("collapsed");
 }
 
 function renderCategoryRow(cat, progressMap, levelKey, studentId) {

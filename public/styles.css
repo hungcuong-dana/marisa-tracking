@@ -598,7 +598,17 @@ main { padding: 28px 0 60px; }
 .level-block .level-hero {
   border-radius: 0;
   box-shadow: none;
+  cursor: pointer;
+  user-select: none;
 }
+.level-block.collapsed .level-body { display: none; }
+.level-chevron {
+  display: inline-block;
+  font-size: 14px;
+  opacity: 0.8;
+  transition: transform 0.15s;
+}
+.level-block:not(.collapsed) .level-chevron { transform: rotate(90deg); }
 .level-body { padding: 14px 18px 18px; }
 .cat-group { margin-top: 10px; }
 .cat-group:first-child { margin-top: 0; }
